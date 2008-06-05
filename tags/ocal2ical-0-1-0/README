@@ -1,0 +1,75 @@
+$Author$
+$Revision$
+$Date$
+
+
+ABOUT
+
+Export events from Oracle Calendar into a .ics file to allow 
+Google Calendar, Apple's iCal, or any tool that reads .ics 
+files, to subscribe to them. These utilities DO NOT PROVIDE 
+SYNCHRONIZATION SERVICES. They only provide-read only access 
+to Oracle Calendar data, but that's better than no access.
+
+
+SYNOPSIS
+
+  ocal_parse.pl --config-file /path/to/config > $HOME/Sites/calendar.ics
+
+  ocal_export --hostname host \
+      --username user \
+      --password password \
+      --begin YYYYMMDD \
+      --end YYYYMMDD | local_parse.pl > /path/to/public_html/calendar.ics
+
+NOTE: Contrary to the Oracle Collaboration Suite SDK notes, 
+the library OracleCalendarSDK.bundle must be in the CURRENT
+working directory in order for the exporter to work. 
+ocal_parse.pl handles this for you when it is configured 
+from a config file as shown above. A sample config file,
+ocal_export.config, is included with the distribution.
+
+NOTE THAT THE CONFIG FILE MUST CONTAIN YOUR ORACLE CALENDAR 
+PASSWORD IN PLAIN TEXT. This is necessary in order to authenticate
+to the Oracle Calendar server. Take pains to restrict access 
+to this file and make sure it is not accessible except to the
+account that owns it. 
+
+The following crontab entry will run this script Monday-Friday
+from 8 a.m. to 6 p.m. at 15 minutes past the hour, writing the 
+results to a file in your Web Sharing directory: 
+
+  15 8-18 * * 1-5 /usr/local/bin/ocal_parse.pl --config-file $HOME/ocal_export.config 2>/dev/null > $HOME/Sites/oracle_calendar.ics
+
+Use the following URL to subscribe using iCal: 
+
+  http://localhost/~your_user_name/oracle_calendar.ics
+
+
+INSTALL
+
+  make
+  sudo make install
+  
+This installs the Oracle Calendar exporter (ocal_export)
+and export-parse script (ocal_parse.pl) in /usr/local/bin, 
+libraries in /usr/local/lib and headers in /usr/local/include.
+
+
+CAVEATS
+
+The OracleCalendarSDK.bundle must be in the CURRENT
+WORKING DIRECTORY for ocal_export to run, not the 
+directory containing ocal_export, as stated in the SDK
+instructions. 
+
+ocal_export occassionally segfaults (EXC_BAD_ACCESS (SIGSEGV), 
+KERN_INVALID_ADDRESS) on intel macs. Certain date spans will
+reliably cause the explosion for a while, then stop exploding
+when events are added or deleted. ocal_parse.pl works around 
+the problem by shifting the date span when it detects a failure;
+the constant FETCH_RETRY determines how many times to retry.
+
+
+-- Zak Burke, zak.burke@gmail.com, 2008-03-25
+
